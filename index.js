@@ -1,7 +1,7 @@
-const mysql = require('mysql2');
+const db = require('./Config/connection');
 const inquirer = require('inquirer');
-const cTable = require('console.table');
-const figlet = require('figlet');
+// const consoleTable = require('console.table');
+// const figlet = require('figlet');
 // const app = express();
 
 
@@ -10,31 +10,10 @@ const figlet = require('figlet');
 // app.use(express.urlencoded({ extended: false }));
 // app.use(express.json());
 
-//============================================ Connect to Database ===========================================
-// Connect to database
-const db = mysql.createConnection(
-    {
-      host: 'localhost',
-      // MySQL username,
-      user: 'root',
-      // MySQL password
-      password: 'password',
-      database: 'management_db'
-    },
-    // console.log(`Connected to the management_db database.`)
-);
-
-db.connect(function(err) {
-    if (err) {
-      return console.error('error: ' + err.message);
-    }
-    console.log('Connected to the management_db.');
-  });
-
 //========================================== Opening Prompt ================================================
 
 function opening() {
-   inquirer.prompt([{
+    inquirer.prompt([{
         type: 'list',
         message: 'What would you like to do?',
         name: 'setup',
@@ -48,14 +27,14 @@ function opening() {
             'Add Department',
             'Exit'
         ]
-}])
-        .then(response => {
-            switch(response.setup) {
+    }])
+        .then(results => {
+            switch (results.setup) {
 
                 case 'View All Employees':
                     viewEmploy()
                     break;
-                
+
                 case 'Add Employee':
                     addEmploy()
                     break;
@@ -63,7 +42,7 @@ function opening() {
                 case 'Update Employee Role':
                     updateRole()
                     break;
-                
+
                 case 'View All Roles':
                     viewRoles()
                     break;
@@ -90,42 +69,111 @@ function opening() {
 //======================================= Functions for Selected Options =================================
 
 // View All Employees
-function viewEmploy() {
+const viewEmploy = () => {
     db.query('SELECT * FROM employee', function (err, results) {
+        if (err) {
+            console.log(err);
+        }
         console.log('You are viewing all Employees');
         console.table(results);
         opening();
     })
 }
 
+
+
 // Add Employee
-function addEmploy() {
-   
+const addEmploy = () => {
+    inquirer.prompt([
+        {
+            type: 'input',
+            message: `What is the employee's first name?`,
+            name: 'firstName'
+        },
+        {
+            type: 'input',
+            message: `What is the employee's last name?`,
+            name: 'lastName'
+        },
+        {
+            type: 'type',
+            message: 'What is the role ID for the employee?',
+            name: 'roleSel'
+        },
+
+    ])
+        .then(results => {
+            db.query('INSERT INTO employee SET ?',
+                {
+                    first_name: results.firstName,
+                    last_name: results.lastName,
+                    role_id: parseInt(results.roleSel)
+                }, function (err) {
+                    if (err) {
+                        console.log(err);
+                    }
+                    console.log(`${results.firstName} ${results.lastName} has been added!`);
+                    opening();
+                })
+        })
 }
 
+
+
+
 // Update Employee Role
-function updateRole() {
-    // show all employees list
-    // select employee with `map`
-    // const employeeChoices = employees.map(({id, first_name, last_name}) => { 
-    // name: `${}`
-    // value: id
-    // }) 
-    //  inquirer.prompt ([
-    // questions
-    //  ]) 
-    // .then(response => {
-    // db.viewRoles()
-    // const employeeRole = viewRoles,map(({id, title}))})
-    //  name: title
-    //  value: id
-    //  another .prompt role for employee
-    // 
+const updateRole = () => {
+    db.query(`SELECT * FROM role`, function (err, results) {
+        if (err) {
+            console.log(err);
+        }
+        console.table(results);
+    })
+    db.query('SELECT * FROM employee', function (err, results) {
+        if (err) {
+            console.log(err);
+        }
+        console.table(results);
+        
+        inquirer.prompt([
+            {
+                type: 'input',
+                message: `What is the ID of the employee you wish to update?`,
+                name: 'employId'
+            },
+            {
+                type: 'input',
+                message: 'What is their new role ID for the employee?',
+                name: 'roleId'
+            }
+        ])
+            .then(results => {
+                let employ = parseInt(results.employId);
+                let role = parseInt(results.roleId);
+
+                db.query(`UPDATE employee SET role_id = ${role} WHERE id = ${employ}`, function (err) {
+                    if (err) {
+                        console.log(err);
+                    }
+                });
+                db.query(`SELECT * FROM employee`, function (err, results) {
+                    if (err) {
+                        console.log(err);
+                    }
+                    console.table(results);
+                    console.log(`Employee's role has been updated`);
+                    opening();
+                })
+            })
+    })
 }
 
 // View All Roles
-function viewRoles() {
+const viewRoles = () => {
     db.query('SELECT * FROM role', function (err, results) {
+        if (err) {
+            console.log(err);
+        }
         console.log('You are viewing all roles');
         console.table(results);
         opening();
@@ -133,7 +181,7 @@ function viewRoles() {
 }
 
 // Add Role
-function addRole() {
+const addRole = () => {
     inquirer.prompt([
         {
             type: 'input',
@@ -150,26 +198,30 @@ function addRole() {
             message: 'What is the department ID for the new role?',
             name: 'roleDepart'
         }
-    ]) .then(response => {
+    ])
+        .then(results => {
             db.query('INSERT INTO role SET ?',
-            {
-                title: response.newRole,
-                salary: parseInt(response.salary),
-                department_id: parseInt(response.roleDepart)
-            },
-            (err, result) => {
-                if (err) {
-                    console.log(err);
+                {
+                    title: results.newRole,
+                    salary: parseInt(results.salary),
+                    department_id: parseInt(results.roleDepart)
+                }, function (err) {
+                    if (err) {
+                        console.log(err);
+                    }
+                    console.log(`${results.newRole} has been added`);
+                    opening();
                 }
-                console.log(`${response.newRole} has been added`);
-            }
             )
-    })
+        })
 }
 
 // View All Departments
-function viewDepts() {
+const viewDepts = () => {
     db.query('SELECT * FROM department', function (err, results) {
+        if (err) {
+            console.log(err);
+        }
         console.log('You are viewing all departments');
         console.table(results);
         opening();
@@ -177,29 +229,28 @@ function viewDepts() {
 }
 
 // Add Department
-function addDept() {
+const addDept = () => {
     inquirer.prompt([
         {
             type: 'input',
             message: 'What is the name of the new department?',
             name: 'depart'
         }
-    ]) .then(response => {
-        db.query(
-            "INSERT INTO department SET ?",
-            {
-                department_name: response.depart
-            },
-            (err, result) => {
-                if (err) {
-                    console.log(err);
-                }
-                    console.log(`${response.depart} department has been added`);
+    ])
+        .then(results => {
+            db.query(
+                "INSERT INTO department SET ?",
+                {
+                    department_name: results.depart
+                }, function (err) {
+                    if (err) {
+                        console.log(err);
+                    }
+                    console.log(`${results.depart} department has been added`);
                     opening();
-            }
-            
-        )
-    })
+                }
+            )
+        })
 }
 
 opening()
