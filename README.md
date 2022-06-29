@@ -1,8 +1,9 @@
 # Employee-Tracker
 
 # Description
+```md
 Developers frequently have to create interfaces that allow non-developers to easily view and interact with information stored in databases. These interfaces are called **content management systems (CMS)**. Your assignment this week is to build a command-line application from scratch to manage a company's employee database, using Node.js, Inquirer, and MySQL.
-
+```
 
    # Table of Contents
 
@@ -46,26 +47,20 @@ THEN I am prompted to select an employee to update and their new role and this i
 ```
 
 ## Installation
+```md
  * Clone repository and open in VS Code.
  * Then in integrated terminal in VS Code:
     * Run  `npm init`
     * Run  `npm i`
-   
-
-
-
+```   
 
 ## Usage
+```md
    You run the code in the terminal with the command line `node index.js`. You then answer the question prompts and make your selections accordingly
-
-
-## Screenshots
-
-![Created-HTML]()
-
+```
 
 ## Screencastify URL
 
-[Screencastify]()
+[Demo Video](https://watch.screencastify.com/v/LaWw6NPvXNAR5bby8Ujk)
 
  

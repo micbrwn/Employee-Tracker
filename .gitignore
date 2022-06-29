@@ -1,4 +1,4 @@
 node_modules
 package-lock.json
-DS-Store
+DS_Store
 .eslintrc.js

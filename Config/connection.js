@@ -10,14 +10,13 @@ const db = mysql.createConnection(
       password: 'password',
       database: 'management_db'
     },
-    // console.log(`Connected to the management_db database.`)
 );
 
 db.connect(function(err) {
     if (err) {
       return console.error('error: ' + err.message);
     }
-    console.log('Connected to the management_db.');
+    // console.log('Connected to the management_db.');
   });
 
   module.exports = db;
